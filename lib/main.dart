@@ -42,11 +42,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     controller = TextEditingController.fromValue(
-      TextEditingValue.fromJSON({'text': 'Username with spaces'}),
+      TextEditingValue.fromJSON({'text': 'New message'}),
     );
     final keyset = Keyset(
       subscribeKey: SUBKEY,
       publishKey: PUBKEY,
+      uuid: UUID('user-1'),
     );
     _pubNub = PubNub(
       defaultKeyset: keyset,
@@ -65,22 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 ?.map(
                   (e) => ChatMessage(
                     timetoken: e.timetoken.value,
-                    name: e.meta['user'],
+                    name: e?.meta['user'] ?? '',
                     text: e.message['text'],
                   ),
                 )
                 ?.toList() ??
             [];
-      });
-      // Add separator
-      setState(() {
-        messages.add(
-          ChatMessage(
-            timetoken: DateTime.now().microsecondsSinceEpoch,
-            name: 'History messages works fine ▲',
-            text: 'But try to send new one ▼',
-          ),
-        );
       });
       final _msgSubscription = _pubNub.subscribe(
         channels: {_messagesChannel},
@@ -92,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             messages.add(
               ChatMessage(
-                timetoken: e.timetoken.value,
+                timetoken: e.publishedAt.value,
                 text: e.payload['text'],
                 name: e.userMeta['user'],
               ),
@@ -103,11 +94,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<int> sendMessage(String username) async {
+  Future<int> sendMessage(String message) async {
     final result = await _pubNub.publish(
       _messagesChannel,
-      {"text": "Payload works fine"},
-      meta: {"user": username},
+      {"text": message},
+      meta: {"user": "user-1"},
     );
     if (result.isError) {
       throw result.description;
@@ -119,14 +110,26 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('PubNub meta bug sample'),
+        title: Text('PubNub add action bug'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: ListView(
-              children: messages.map((msg) => MessageView(msg)).toList(),
+              children: messages
+                  .map((msg) => MessageView(
+                        msg,
+                        action: () async {
+                          await _pubNub.addMessageAction(
+                            'report',
+                            'report',
+                            _messagesChannel,
+                            Timetoken(msg.timetoken),
+                          );
+                        },
+                      ))
+                  .toList(),
             ),
           ),
           SafeArea(

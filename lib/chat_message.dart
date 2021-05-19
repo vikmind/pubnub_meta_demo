@@ -14,22 +14,26 @@ class ChatMessage {
 
 class MessageView extends StatelessWidget {
   final ChatMessage message;
+  final VoidCallback action;
 
-  const MessageView(this.message, {Key key}) : super(key: key);
+  const MessageView(
+    this.message, {
+    Key key,
+    this.action,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
+      child: Row(
         children: [
-          Text(
-            'Name: ${message.name}',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          Text(message.text),
+          Expanded(child: Text(message.text)),
+          IconButton(
+            icon: Icon(Icons.report),
+            onPressed: action,
+          )
         ],
       ),
     );
   }
 }
-

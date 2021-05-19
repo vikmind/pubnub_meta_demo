@@ -85,13 +85,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  dio:
-    dependency: transitive
-    description:
-      name: dio
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.10"
   encrypt:
     dependency: transitive
     description:
@@ -116,13 +109,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  http_parser:
+  form_data:
     dependency: transitive
     description:
-      name: http_parser
+      name: form_data
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.4"
+    version: "0.0.1"
   matcher:
     dependency: transitive
     description:
@@ -175,12 +168,10 @@ packages:
   pubnub:
     dependency: "direct main"
     description:
-      path: "."
-      ref: batch-history-fixes
-      resolved-ref: "1bfb5a1f0c4abfbe4d71f218671056b1b92f72b2"
-      url: "git@github.com:Uscreen-video/pubnub-dart.git"
-    source: git
-    version: "3.0.2"
+      name: pubnub
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.2.0"
   sky_engine:
     dependency: transitive
     description: flutter
