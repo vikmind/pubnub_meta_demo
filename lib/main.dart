@@ -32,16 +32,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<ChatMessage> messages = [];
+  List<ChatMessage> _messages = [];
   PubNub _pubNub;
   final String _messagesChannel =
       'messages_channel_' + DateTime.now().toIso8601String().substring(0, 13);
-  TextEditingController controller;
+  TextEditingController _controller;
+  List<String> _errors = [];
 
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController.fromValue(
+    _controller = TextEditingController.fromValue(
       TextEditingValue.fromJSON({'text': 'New message'}),
     );
     final keyset = Keyset(
@@ -62,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ).then((batch) {
       final historyEntries = batch.channels[_messagesChannel];
       setState(() {
-        messages = historyEntries
+        _messages = historyEntries
                 ?.map(
                   (e) => ChatMessage(
                     timetoken: e.timetoken.value,
@@ -81,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _msgSubscription.messages.listen((e) {
         if (e.messageType == MessageType.normal) {
           setState(() {
-            messages.add(
+            _messages.add(
               ChatMessage(
                 timetoken: e.publishedAt.value,
                 text: e.payload['text'],
@@ -106,6 +107,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return result.timetoken;
   }
 
+  void _addAction(int timetoken) {
+    _pubNub
+        .addMessageAction(
+      'report',
+      'report',
+      _messagesChannel,
+      Timetoken(timetoken),
+    )
+        .catchError(
+      (e) {
+        setState(() => _errors.add(e.toString()));
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,19 +133,17 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Expanded(
             child: ListView(
-              children: messages
+              children: _messages
                   .map((msg) => MessageView(
                         msg,
-                        action: () async {
-                          await _pubNub.addMessageAction(
-                            'report',
-                            'report',
-                            _messagesChannel,
-                            Timetoken(msg.timetoken),
-                          );
-                        },
+                        action: () => _addAction(msg.timetoken),
                       ))
                   .toList(),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              children: _errors.map((e) => Text(e)).toList(),
             ),
           ),
           SafeArea(
@@ -138,11 +152,11 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: controller,
+                    controller: _controller,
                   ),
                 ),
                 IconButton(
-                  onPressed: () => sendMessage(controller.text),
+                  onPressed: () => sendMessage(_controller.text),
                   icon: Icon(Icons.send),
                 ),
               ],
