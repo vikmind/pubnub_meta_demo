@@ -1,9 +1,19 @@
-# PubNub meta encoding bug demo
+# PubNub addMessageAction problem demo
 
-Meta info sending with payload from dart code appears
-to be not properly decoded by the transmitting server.
+Steps to reproduce:
 
-At the same time, messages fetched as history does not have such problem.
+1. Send a message
+2. Tap on the exclamation mark sign to add action.
+3. `PubNubException: 400 error: No JSON payload`
+
+```dart
+_pubNub.addMessageAction(
+  'report',
+  'report',
+  _messagesChannel,
+  Timetoken(timetoken),
+);
+```
 
 ![Screenshot](https://raw.githubusercontent.com/vikmind/pubnub_meta_demo/master/assets/screenshot.png)
 

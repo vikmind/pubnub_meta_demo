@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('PubNub add action bug'),
+        title: Text('PubNub addMessageAction bug'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
